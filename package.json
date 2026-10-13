@@ -1,0 +1,23 @@
+{
+  "name": "fulfillment-crm",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "node server/index.js",
+    "build": "vite build",
+    "start": "vite build && node server/index.js --prod"
+  },
+  "dependencies": {
+    "express": "4.22.3",
+    "react": "19.3.0",
+    "react-dom": "19.3.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "6.1.1",
+    "vite": "8.3.1"
+  },
+  "engines": {
+    "node": ">=22.12.0"
+  }
+}

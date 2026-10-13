@@ -1,0 +1,4 @@
+node_modules/
+dist/
+# Sheet snapshot, local edits and uploaded quotations (contain buyer data)
+data/

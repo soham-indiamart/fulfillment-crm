@@ -34,6 +34,7 @@ const FIELDS = {
   priority: { col: 'priority', type: 'text', editable: true, allowed: ['', ...PRIORITIES] },
   worked: { col: 'worked_flag', type: 'flag', editable: true },
   workedBy: { col: 'work_emp_name', type: 'text', editable: true },
+  aovSlab: { col: 'aov_slab', type: 'text' },
   callAttempted: { col: 'call_attempted', type: 'flag', editable: true },
   lms: { col: 'interaction_via_lms_calls', type: 'flag', editable: true },
   progress: { col: 'progress_update', type: 'text', editable: true, allowed: ['', ...PROGRESS] },

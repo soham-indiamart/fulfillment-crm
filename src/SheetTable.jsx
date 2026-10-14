@@ -6,6 +6,7 @@ import { CheckIcon, ClipIcon, CrossIcon, PhoneIcon } from './Icons.jsx';
 const COLUMNS = [
   ['Priority', 106],
   ['Worked', 62],
+  ['AOV Slab', 110],
   ['Offer ID', 138],
   ['RAG · Seller introduced', 180],
   ['Interaction via LMS', 96],
@@ -89,6 +90,9 @@ function Row({ row, actions, pending }) {
             aria-label={`Worked, offer ${row.offerId}`}
           />
         </label>
+      </td>
+      <td>
+        {row.aovSlab || <span className="muted">—</span>}
       </td>
       <td>
         <a className="offer-link" href={glAdminUrl(row.offerId)} target="_blank" rel="noreferrer" onClick={openOffer}>

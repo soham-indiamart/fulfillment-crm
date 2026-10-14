@@ -14,11 +14,12 @@ Use `PORT=8080 npm start` to change the port. Requires Node 22.12+.
 
 ## How data flows today
 
-- **Reading:** rows come live from the Google Sheet (it is shared by link). Each successful read is also saved to `data/sheet-snapshot.csv`, so if Google can't be reached the app shows that offline copy.
-- **Writing:** edits are saved on this computer in `data/local-edits.json`, and uploaded quotation files go to `data/uploads/`. Nothing is written to the Google Sheet or Drive yet — that needs the service account (see below).
+- **Database:** rows come from the `fulfillment_offers` table in Neon Postgres. The connection string (`DATABASE_URL`) is read from `../.env.local` (the parent Neon project), or from a local `.env`.
+- **Loading the sheet:** the table is filled from Sheet 4 by the parent project (`npm run build && npm run import-sheet` in `..`). Re-importing overwrites the dashboard's edits for offers still in the sheet.
+- **Writing:** dashboard edits are saved straight to the table. Uploaded quotation files still go to `data/uploads/` on this computer. Nothing is written to the Google Sheet or Drive.
 - **Offer ID → GL Admin:** GL Admin only allows embedding from `https://*.indiamart.com`, so on localhost it opens in a separate window; hosted under an `indiamart.com` https address it opens inside the dashboard.
 
-To start from a clean slate, stop the server and delete `data/local-edits.json` and `data/uploads/`.
+
 
 ## Column mapping (Sheet 4)
 

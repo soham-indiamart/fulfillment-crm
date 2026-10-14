@@ -47,7 +47,7 @@ export default function SheetTable({ rows, actions, pendingRow }) {
           </thead>
           <tbody>
             {rows.map((row) => (
-              <Row key={row.sheetRow} row={row} actions={actions} pending={row.sheetRow === pendingRow} />
+              <Row key={row.offerId} row={row} actions={actions} pending={row.offerId === pendingRow} />
             ))}
           </tbody>
         </table>

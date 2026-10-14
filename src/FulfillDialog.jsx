@@ -48,7 +48,7 @@ export default function FulfillDialog({ row, onCancel, onSubmit }) {
         <div>
           <h2 id="ff-title">Mark as fulfilled</h2>
           <p className="sub">
-            Offer <span className="mono">{row.offerId}</span> · Sheet 4, row {row.sheetRow}
+            Offer <span className="mono">{row.offerId}</span>
           </p>
         </div>
 

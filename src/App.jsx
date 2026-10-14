@@ -55,10 +55,10 @@ export default function App() {
   };
 
   const replaceRow = (row) =>
-    setData((d) => ({ ...d, rows: d.rows.map((r) => (r.sheetRow === row.sheetRow ? row : r)) }));
+    setData((d) => ({ ...d, rows: d.rows.map((r) => (r.offerId === row.offerId ? row : r)) }));
 
   const save = async (row, patch, label) => {
-    const where = `Row ${row.sheetRow} · ${label}`;
+    const where = `Offer ${row.offerId} · ${label}`;
     replaceRow({ ...row, ...patch });
     setSync({ state: 'busy', text: `Saving · ${where}` });
     try {
@@ -106,28 +106,27 @@ export default function App() {
 
   const submitFulfill = async ({ remarks, file }) => {
     const row = fulfilling;
-    setSync({ state: 'busy', text: `${file ? 'Uploading quotation' : 'Saving'} · Row ${row.sheetRow}` });
+    setSync({ state: 'busy', text: `${file ? 'Uploading quotation' : 'Saving'} · Offer ${row.offerId}` });
     const payload = { remarks };
     if (file) payload.file = { name: file.name, type: file.type, dataBase64: await readFileBase64(file) };
     try {
       replaceRow(await fulfillRow(row, payload));
     } catch (e) {
-      setSync({ state: 'error', text: `Not saved · Row ${row.sheetRow} · ${e.message}` });
+      setSync({ state: 'error', text: `Not saved · Offer ${row.offerId} · ${e.message}` });
       throw e;
     }
     setFulfilling(null);
     setSync({
       state: 'ok',
-      text: `Saved · Row ${row.sheetRow} · Progress Update → Fulfilled · Fulfillment Flag → 1${file ? ' · quotation stored' : ''}`,
+      text: `Saved · Offer ${row.offerId} · Progress Update → Fulfilled · Fulfillment Flag → 1${file ? ' · quotation stored' : ''}`,
     });
   };
 
   const closeFulfill = useCallback(() => setFulfilling(null), []);
   const closeOfferWindow = useCallback(() => setOfferWindow(null), []);
 
-  const idleText = data?.source === 'snapshot' ? 'Google Sheets unreachable — showing the offline copy' : 'Up to date';
-  const statusText = sync.text || (data ? idleText : loading ? 'Loading Sheet 4…' : '');
-  const statusState = sync.text ? sync.state : data?.source === 'snapshot' ? 'busy' : 'ok';
+  const statusText = sync.text || (data ? 'Up to date' : loading ? 'Loading Sheet 4…' : '');
+  const statusState = sync.text ? sync.state : 'ok';
 
   return (
     <div className="page">
@@ -141,14 +140,15 @@ export default function App() {
             <p className="meta">
               {data ? (
                 <>
-                  {data.source === 'live' ? 'Live from ' : 'Offline copy of '}
+                  {'Neon database · imported from '}
                   <a href={data.sheetUrl} target="_blank" rel="noreferrer">
                     Google Sheet
                   </a>
-                  {` · fetched ${formatTime(data.fetchedAt)}`}
+                  {data.importedAt && ` ${formatTime(data.importedAt)}`}
+                  {` · loaded ${formatTime(data.fetchedAt)}`}
                 </>
               ) : (
-                'Connecting to Google Sheet…'
+                'Connecting to the database…'
               )}
             </p>
           </div>
@@ -164,7 +164,7 @@ export default function App() {
             </label>
             <button type="button" className="btn" onClick={load} disabled={loading}>
               <RefreshIcon />
-              {loading ? 'Refreshing…' : 'Refresh from sheet'}
+              {loading ? 'Refreshing…' : 'Refresh'}
             </button>
           </div>
         </header>
@@ -175,7 +175,7 @@ export default function App() {
             {statusText}
           </span>
           <span className="notice">
-            Edits are saved on this computer until write access to Sheet 4 is connected.
+            Edits are saved to the Neon database; they are not written back to Sheet 4.
           </span>
         </div>
 
@@ -199,7 +199,7 @@ export default function App() {
             ) : !data ? (
               <p className="muted">Loading Sheet 4…</p>
             ) : tab === 'sheet' ? (
-              <SheetTable rows={data.rows} actions={actions} pendingRow={fulfilling?.sheetRow} />
+              <SheetTable rows={data.rows} actions={actions} pendingRow={fulfilling?.offerId} />
             ) : (
               <Summary rows={data.rows} />
             )}

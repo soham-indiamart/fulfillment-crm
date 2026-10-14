@@ -13,12 +13,9 @@ const json = (method, body) => ({
 
 export const getRows = () => request('/api/rows');
 
-// Rows are addressed by sheet row number; the offer ID guards against the sheet having changed.
-export const patchRow = (row, changes) =>
-  request(`/api/rows/${row.sheetRow}`, json('PATCH', { offerId: row.offerId, changes }));
+export const patchRow = (row, changes) => request(`/api/rows/${row.offerId}`, json('PATCH', { changes }));
 
-export const fulfillRow = (row, payload) =>
-  request(`/api/rows/${row.sheetRow}/fulfill`, json('POST', { offerId: row.offerId, ...payload }));
+export const fulfillRow = (row, payload) => request(`/api/rows/${row.offerId}/fulfill`, json('POST', payload));
 
 export function readFileBase64(file) {
   return new Promise((resolve, reject) => {

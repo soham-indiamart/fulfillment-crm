@@ -1,4 +1,6 @@
 node_modules/
+.env
+.env.local
 dist/
 # Sheet snapshot, local edits and uploaded quotations (contain buyer data)
 data/

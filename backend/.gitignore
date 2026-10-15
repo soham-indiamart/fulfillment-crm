@@ -1,0 +1,9 @@
+node_modules/
+build/
+coverage/
+*.tsbuildinfo
+.env
+.env.local
+!.env.example
+# Uploaded quotation files (contain buyer data)
+data/

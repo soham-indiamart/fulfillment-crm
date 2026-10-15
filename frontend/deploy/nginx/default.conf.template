@@ -1,0 +1,65 @@
+# Serves the built dashboard and forwards /api and /uploads to the backend, so the browser sees
+# one origin (no CORS needed). ${BACKEND_URL} is filled in from the environment when the
+# container starts (nginx image templates); it can be an internal address or an HTTPS URL.
+
+server {
+  listen 8080;
+  server_name _;
+  root /usr/share/nginx/html;
+  server_tokens off;
+
+  gzip on;
+  gzip_types text/css application/javascript application/json image/svg+xml;
+  gzip_min_length 1024;
+
+  # Inherited by every location below that sets no headers of its own.
+  add_header Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; frame-src https://gladmin.intermesh.net; frame-ancestors 'self'; base-uri 'self'; form-action 'self'; object-src 'none'" always;
+  add_header X-Content-Type-Options "nosniff" always;
+  add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+  add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+
+  # Container health check.
+  location = /healthz {
+    access_log off;
+    default_type text/plain;
+    return 200 "ok\n";
+  }
+
+  # Hashed file names never change content: cache for a year.
+  location /assets/ {
+    expires 1y;
+    try_files $uri =404;
+  }
+
+  # The app shell must always be revalidated so new deploys show up immediately.
+  location = /index.html {
+    expires -1;
+  }
+
+  # Client-side routes fall back to the app shell.
+  location / {
+    try_files $uri /index.html;
+  }
+
+  location /api/ {
+    proxy_pass ${BACKEND_URL};
+    proxy_http_version 1.1;
+    proxy_ssl_server_name on;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_set_header X-Request-Id $request_id;
+    proxy_read_timeout 120s;
+    # Quotation uploads are limited to 20 MB by the API; allow multipart overhead.
+    client_max_body_size 25m;
+  }
+
+  # Stored quotation files open in the browser's own viewers, so the page CSP is not applied.
+  location /uploads/ {
+    proxy_pass ${BACKEND_URL};
+    proxy_http_version 1.1;
+    proxy_ssl_server_name on;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    add_header X-Content-Type-Options "nosniff" always;
+  }
+}

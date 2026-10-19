@@ -9,9 +9,13 @@ services:
     plan: free
     # Same region as the Neon database (AWS ap-southeast-1).
     region: singapore
-    rootDir: backend
-    dockerfilePath: ./Dockerfile
-    dockerContext: .
+    # Paths are from the repo root, so they don't depend on how Render combines them with rootDir.
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    # Only redeploy when the backend changes.
+    buildFilter:
+      paths:
+        - backend/**
     healthCheckPath: /healthz
     envVars:
       # Neon's pooled connection string; entered in the Render dashboard, never committed.

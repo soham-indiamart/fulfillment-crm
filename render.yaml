@@ -1,0 +1,55 @@
+# Render Blueprint: the API as a Docker web service and the dashboard as a static site.
+# The static site forwards /api and /uploads to the API, so the browser sees one origin (no CORS).
+# If Render gives the API a different onrender.com address, update the two rewrite URLs below.
+
+services:
+  - type: web
+    name: fulfillment-crm-api
+    runtime: docker
+    plan: free
+    # Same region as the Neon database (AWS ap-southeast-1).
+    region: singapore
+    rootDir: backend
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /healthz
+    envVars:
+      # Neon's pooled connection string; entered in the Render dashboard, never committed.
+      - key: DATABASE_URL
+        sync: false
+      - key: NODE_ENV
+        value: production
+      # Free instances have no persistent disk: uploaded quotations are lost on restart or redeploy.
+      - key: UPLOAD_DIR
+        value: data/uploads
+
+  - type: web
+    name: fulfillment-crm
+    runtime: static
+    rootDir: frontend
+    buildCommand: npm ci && npm run build
+    staticPublishPath: dist
+    envVars:
+      - key: NODE_VERSION
+        value: 24.19.0
+    routes:
+      - type: rewrite
+        source: /api/*
+        destination: https://fulfillment-crm-api.onrender.com/api/*
+      - type: rewrite
+        source: /uploads/*
+        destination: https://fulfillment-crm-api.onrender.com/uploads/*
+      # Client-side routes fall back to the app shell.
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    headers:
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff
+      - path: /*
+        name: Referrer-Policy
+        value: strict-origin-when-cross-origin
+      - path: /assets/*
+        name: Cache-Control
+        value: public, max-age=31536000, immutable
